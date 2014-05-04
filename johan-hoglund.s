@@ -69,6 +69,7 @@ kloop:
 			s.s	$f1	0($t4) # Store
 
 			bne $t1,	$a1, jloop # while(j < N) or rather, while(j != N)
+			nop
 
 
 			# Here we *should* set A[k][k] = 1, but it seems to end up that way anyhow :)
@@ -79,6 +80,7 @@ kloop:
 
 		# If k = N-1, that means i = N, if so, don't enter loops below, quit instead :)
 		beq $t0, $a1, eliminated
+		nop
 
 		iloop:
 				addiu $t1,	$t2,	1	# We may actually pre-compute this value before entering the iloop
@@ -125,18 +127,21 @@ kloop:
 						s.s	$f2, 0($t3) # Store result back to memory
 
 						# Do this *after* using the values
-						addiu $t3, $t3, 4 # Instead of re-computing the indexes for A[i][k] and A[k][j] (expensive)
-						addiu $t5, $t5, 4 # we can increase them by one position (4 bytes) per iteration :)
+						addiu $t3, $t3, 4 # Instead of re-computing the indexes for A[i][k] and A[k][j] (expensive) we can increase them by one position (4 bytes) per iteration :)
+						addiu $t5, $t5, 4 # Do this here, since we're stalling for the sub.s anyhow
 
 						bne $t1, $t3, ijloop # End of ij loop
+						nop
 				sw $zero 0($t4) # Write 0 back to A[i][k] memory
 				
 				addiu $t0, $t0, 1 # i++
 				bne $t0, $a1, iloop # End of i loop
+				nop
 		
 		addiu $t6, $t6, 100 # Move one row down (96 byte) and one column right (4 byte)
 		addiu	$t2, $t2, 1
 		bne		$t2, $a1, kloop # Loop if $t2 (k) is smaller than N
+		nop
 
 		eliminated: 
 
