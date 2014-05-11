@@ -7,12 +7,12 @@ start:
 		la		$a0, matrix_24x24		# a0 = A (base address of matrix)
 		li		$a1, 24    		    # a1 = N (number of elements per row)
 									# <debug>
-		jal 	print_matrix	    # print matrix before elimination
-		nop							# </debug>
+		#jal 	print_matrix	    # print matrix before elimination
+		#nop							# </debug>
 		jal 	eliminate			# triangularize matrix!
 		nop							# <debug>
-		jal 	print_matrix		# print matrix after elimination
-		nop							# </debug>
+		#jal 	print_matrix		# print matrix after elimination
+		#nop							# </debug>
 		jal 	exit
 
 exit:
@@ -29,7 +29,12 @@ eliminate:
 		# If necessary, create stack frame, and save return address from ra
 		addiu	$sp, $sp, -4		# allocate stack frame
 		sw		$ra, 0($sp)			# done saving registers
-		
+
+
+		# Save 1 to registry f3
+		la	$a3, one
+		l.s $f3, 0($a3)
+
 		##
 		## Implement eliminate here
 		## 
@@ -44,7 +49,7 @@ kloop:
 		# Store CONTENTS in A[k][k] in f0 for use with fp co-processor
 		l.s	$f0,	0($t6)
 	
-#		div.s $f0, $f3, $f0 # Store 1/A[k][k] for re-use later, since multiplication is cheaper than division
+		div.s $f0, $f3, $f0 # Store 1/A[k][k] for re-use later, since multiplication is cheaper than division
 
 		addiu	$t1, $t2, 1 # j = k + 1
 		
@@ -65,7 +70,7 @@ kloop:
 			# Do this here, while we're waiting for memory to be read in, instead of doin it just before the BNE below 
 			addiu $t1, $t1, 1	# j++
 			
-			div.s $f1,	$f1,	$f0
+			mul.s $f1,	$f1,	$f0
 			s.s	$f1	0($t4) # Store
 
 			bne $t1,	$a1, jloop # while(j < N) or rather, while(j != N)
