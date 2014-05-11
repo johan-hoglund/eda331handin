@@ -1,0 +1,45 @@
+
+
+Set Settings -> Delayed branching
+
+
+Cache size mäts i WORDS inte BYTES (1 WORD = 4 BYTES)
+
+Total component cost:
+	1) Compute cache cost, remember cache size is given in WORDS
+
+	2) Add write buffer cost
+
+	3) Add memory cost
+
+	4) Total cost: cpu + instruction cache + data cache + write buffer + memory
+
+Compute clock frequency:
+	* Use smallest clock frequency defined by d/i caches used.
+
+Compute memory access times in cycles:
+	(time in ns) * ( (clock frequency in MHz) / 100 )
+
+Find out total clock cycles:
+	PET -> Performance -> Memory -> clock cycle count
+
+
+Total cost in musC$:
+	((Clock cycle count) / (Clock frequency in MHz) ) * (Total component cost)
+
+
+
+Bullet list of performance improvements:
+	* Pre-compute 1/A[k][k]
+	* Avoid pseudo instructions (s.s -> swc1)
+	* Avoid nops, put useful instructions there instead
+	* Use N-way set instead of direct mapping (data cache only)
+
+	
+
+
+
+
+
+
+
