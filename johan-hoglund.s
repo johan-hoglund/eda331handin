@@ -33,7 +33,7 @@ eliminate:
 
 		# Save 1 to registry f3
 		la	$a3, one
-		l.s $f3, 0($a3)
+		lwc1 $f3, 0($a3)
 
 		##
 		## Implement eliminate here
@@ -47,7 +47,7 @@ move $t6,	$a0 # Set (k, k) to (0, 0), data register start
 
 kloop:
 		# Store CONTENTS in A[k][k] in f0 for use with fp co-processor
-		l.s	$f0,	0($t6)
+		lwc1	$f0,	0($t6)
 	
 		div.s $f0, $f3, $f0 # Store 1/A[k][k] for re-use later, since multiplication is cheaper than division
 
@@ -60,18 +60,14 @@ kloop:
 			sll $t4,	$t4,	2	# Left-shift two times, equals multiplication by 4, since we use 4 bytes per value in our matrix
 			addu	$t4,	$t4,	$a0	# Add base address to our matrix
 
-			
-			
-		
-			
 			# Store CONTENTS in A[k][j] to registry f1
-			l.s	$f1	0($t4)
+			lwc1	$f1	0($t4)
 			
 			# Do this here, while we're waiting for memory to be read in, instead of doin it just before the BNE below 
 			addiu $t1, $t1, 1	# j++
 			
 			mul.s $f1,	$f1,	$f0
-			s.s	$f1	0($t4) # Store
+			swc1	$f1	0($t4) # Store
 
 			bne $t1,	$a1, jloop # while(j < N) or rather, while(j != N)
 			nop
@@ -108,7 +104,7 @@ kloop:
 				addu $t5, $t5, $a0 # add base address
 
 				# Read in values so: f0 = A[i][k], it will not change during innner loop
-				l.s	$f0, 0($t4)
+				lwc1	$f0, 0($t4)
 				
 
 				# Set t1 to the value that t3 will have when the loop is finished
@@ -122,14 +118,14 @@ kloop:
 
 				ijloop:
 						# Read f1 = A[k][j]
-						l.s $f1, 0($t5)
+						lwc1 $f1, 0($t5)
 						# Read f2 = A[i][j]
-						l.s	$f2, 0($t3)
+						lwc1	$f2, 0($t3)
 
 						mul.s	$f1, $f1,	$f0 # A[i][k] * A[k][j], save to registry f1 (used for storing A[k][j])
 						sub.s	$f2, $f2, $f1 # Replace contents of f2 (which was A[i][j])
 						
-						s.s	$f2, 0($t3) # Store result back to memory
+						swc1	$f2, 0($t3) # Store result back to memory
 
 						# Do this *after* using the values
 						addiu $t3, $t3, 4 # Instead of re-computing the indexes for A[i][k] and A[k][j] (expensive) we can increase them by one position (4 bytes) per iteration :)
