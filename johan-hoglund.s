@@ -6,13 +6,14 @@ start:
 
 		la		$a0, matrix_24x24		# a0 = A (base address of matrix)
 		li		$a1, 24    		    # a1 = N (number of elements per row)
+		li		$s0, 96 # Number of bytes per row
 									# <debug>
 		#jal 	print_matrix	    # print matrix before elimination
 		#nop							# </debug>
 		jal 	eliminate			# triangularize matrix!
 		nop							# <debug>
-		#jal 	print_matrix		# print matrix after elimination
-		#nop							# </debug>
+		jal 	print_matrix		# print matrix after elimination
+		nop							# </debug>
 		jal 	exit
 
 exit:
@@ -83,14 +84,16 @@ kloop:
 		beq $t0, $a1, eliminated
 		nop
 
+		# Assign t4 to be i*k
+		mul $t4,	$t0,	$a1 # i * (elements per row)
+		addu $t4,	$t4,	$t2 # += k
+		sll $t4,	$t4,	2 # * 4
+		addu $t4,	$t4,	$a0 # Base address to matrix
+		
+		
 		iloop:
 				addiu $t1,	$t2,	1	# We may actually pre-compute this value before entering the iloop
 				
-				# Assign t4 to be i*k
-				mul $t4,	$t0,	$a1 # i * (elements per row)
-				addu $t4,	$t4,	$t2 # += k
-				sll $t4,	$t4,	2 # * 4
-				addu $t4,	$t4,	$a0 # Base address to matrix
 
 				# pre-compute i*j and k*j
 				mul $t3,	$t0, $a1  # t3 = index for [i][0]
@@ -136,6 +139,7 @@ kloop:
 				sw $zero 0($t4) # Write 0 back to A[i][k] memory
 				
 				addiu $t0, $t0, 1 # i++
+				addu $t4, $t4, $s0
 				bne $t0, $a1, iloop # End of i loop
 				nop
 		
